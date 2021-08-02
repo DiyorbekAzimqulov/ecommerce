@@ -1,0 +1,26 @@
+{% extends 'auctions/layout.html' %}
+{% block title %}
+    Watchlist
+{% endblock %}
+{% block body %}
+{% for watchlist in watchlists %}
+<div>
+    <h1 style="text-align: left;" >{{watchlist.title}}</h1>
+    <p>{{watchlist.description}}</p>
+    <a href="{% url 'auctions:listing-detail' watchlist.id %}">
+    <img src="../media/{{watchlist.image.name}}" alt="{{watchlist.title}}" style="width:450px;height:250px; text-align: center;">
+</a>
+    <p><b>Price: </b>${{watchlist.price}}</p>
+
+    <p1 style="font-family: Verdana, Geneva, Tahoma, sans-serif;">Created: {{watchlist.created}}</p1>
+    <form action="" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="watchlist_id" value="{{watchlist.id}}">
+        <input type="hidden" name="add" value="0">
+        <input type="submit" value="Remove from watchlist" />
+    </form>
+</div><br><hr>
+{% empty %}
+<h1>There are no active listings.</h1>
+{% endfor %}
+{% endblock %}

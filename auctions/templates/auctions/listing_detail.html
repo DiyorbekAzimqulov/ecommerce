@@ -1,0 +1,79 @@
+{% extends 'auctions/layout.html' %}
+{% block title %}
+    {{listing.title}}
+{% endblock %}
+{% block body %}
+<div>
+    <h1 style="text-align: left;" >{{listing.title}}</h1>
+    <p>{{listing.description}}</p>
+    <img src="../media/{{listing.image.name}}" alt="{{listing.title}}" style="width:450px;height:250px; text-align: center;">
+    {% if not listing.is_active %}
+        <p><b>Original Price: </b>${{listing.price}}</p>
+
+        <p1 style="font-family: Verdana, Geneva, Tahoma, sans-serif;">Created: {{listing.created}}</p1><br>
+        <p1 style="font-family: Verdana, Geneva, Tahoma, sans-serif;">Ended: {{listing.closed}}</p1>
+        <p><b>Current bid: ${{current_bid}}</b></p>
+        <p1>Number of bid(s) : {{listing.number_of_bids}}</p1><br>
+        <h3>Details</h3>
+        <ul>
+            <li>Listed by: {{listing.owner}}</li>
+            <li>Category: {{listing.category}}</li>
+            <li>Winner: {{listing.winner}}</li>
+        </ul>
+    {% else %}
+        {% if listing.owner == request.user and listing.is_active %}
+            <form action="{% url 'auctions:close-listing' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="close_id" value="{{listing.id}}">
+                <input type="submit" value="Close Auction"/>
+            </form>
+        {% endif %}
+        
+        {% if listing not in request.user.watchlist.all %}
+            <form action="{% url 'auctions:watchlist' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="watchlist_id" value="{{listing.id}}">
+                <input type="hidden" name="add" value="1">
+                <input type="submit" value="Add to watchlist"/>
+            </form>
+        {% else %}
+        <form action="{% url 'auctions:watchlist' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="watchlist_id" value="{{listing.id}}">
+            <input type="hidden" name="add" value="0">
+            <input type="submit" value="remove from watchlist"/>
+        </form>
+        {% endif %}
+        <p><b>Original Price: </b>${{listing.price}}</p>
+
+        <p1 style="font-family: Verdana, Geneva, Tahoma, sans-serif;">Created: {{listing.created}}</p1>
+        <p><b>Current bid: ${{current_bid}}</b></p>
+        <p1>Number of bid(s) so far: {{listing.number_of_bids}}</p1><br>
+        {% if error%}
+            {{error}}
+        {%endif%}
+        <form action="" method="POST">
+            {% csrf_token %}
+            {{form}}
+            <input type="submit" value="Place">
+        </form>
+        </div><br><hr>
+        <h3>Details</h3>
+            <ul>
+                <li>Listed by: {{listing.owner}}</li>
+                <li>Category: {{listing.category}}</li>
+            </ul>
+    {% endif %}
+    <h3>Comments:</h3>
+    <form action="{% url 'auctions:comment'%}" method="POST">
+        {% csrf_token %}
+        <input type="text" name="comment" placeholder="Your comment">
+        <input type="hidden" name="id" value="{{listing.id}}">
+        <input type="submit" value="Comment">
+    </form>
+    {% for comment in comments %}
+        <p>{{comment.owner}}: {{comment.text}}</p>
+    {% empty %}
+    <h3>No comments yet</h3>
+    {% endfor %}
+{% endblock %}
